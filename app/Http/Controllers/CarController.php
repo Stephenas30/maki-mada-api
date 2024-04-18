@@ -41,6 +41,12 @@ class CarController extends Controller
      */
     public function store(StoreCarRequest $request)
     {
+        // Enregistre l'image dans le dossier de stockage (storage/app/public)
+        $imagePath = $request->file('symbole')->store('public');
+
+        // Obtient le chemin de stockage public de l'image
+        $publicImagePath = str_replace('public/', 'storage/', $imagePath);
+
         $details =[
             'nom_voiture' => $request->nom_voiture,
             'boite' => $request->boite,
@@ -61,7 +67,7 @@ class CarController extends Controller
             'dispo' => $request->dispo,
             'lieu_dispo' => $request->lieu_dispo,
             'motorisation' => $request->motorisation,
-            'symbole' => $request->symbole
+            'symbole' => $publicImagePath
         ];
         DB::beginTransaction();
         try{

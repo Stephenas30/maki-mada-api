@@ -88,7 +88,15 @@ class CarController extends Controller
     {
         $car = $this->carRepositoryInterface->getById($voiture_id);
 
-        return ApiResponseClass::sendResponse(new CarResource($car),'',200);
+        // Affichage des images
+        $carWithImages = Car::with('images')->find($voiture_id);
+
+        $carResource = new CarResource($car);
+        $carResource->additional([
+            'images' => $carWithImages->images
+        ]);
+
+        return ApiResponseClass::sendResponse($carResource,'',200);
     }
 
     /**
@@ -104,6 +112,10 @@ class CarController extends Controller
      */
     public function update(UpdateCarRequest $request, $voiture_id)
     {
+        $symbolePath = $request->file('symbole')->store('public');
+
+        $publicSymbolePath = str_replace('public/', 'storage/', $symbolePath);
+
         $updateDetails =[
             'nom_voiture' => $request->nom_voiture,
             'boite' => $request->boite,
@@ -124,7 +136,7 @@ class CarController extends Controller
             'dispo' => $request->dispo,
             'lieu_dispo' => $request->lieu_dispo,
             'motorisation' => $request->motorisation,
-            'symbole' => $request->symbole
+            'symbole' => $publicSymbolePath
         ];
         DB::beginTransaction();
         try{
